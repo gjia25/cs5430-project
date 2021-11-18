@@ -1,6 +1,6 @@
 #!/bin/bash
 
-total=1
+total=2
 passed=0
 
 make all
