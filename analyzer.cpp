@@ -53,6 +53,8 @@ void execute_query(std::ofstream& fout, std::string& subj, std::string& obj,
     }
     std::cout << "Query, " << subj << ", " << obj << ", " << priv << " "
               << authorized << std::endl;
+    fout << "Query, " << subj << ", " << obj << ", " << priv << " "
+              << authorized << std::endl;
 }
 
 void execute_add(std::ofstream& fout, std::string& subj, std::string& obj,
@@ -74,6 +76,7 @@ void execute_add(std::ofstream& fout, std::string& subj, std::string& obj,
       subj_map.at(subj)->incr_take(subj_map[obj]);
     }
     std::cout << "Add, " << subj << ", " << obj << ", " << priv << std::endl;
+    fout << "Add, " << subj << ", " << obj << ", " << priv << std::endl;
 }
 
 int main(const int argc, const char** argv)
