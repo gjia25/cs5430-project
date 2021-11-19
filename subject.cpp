@@ -1,10 +1,10 @@
 #include "subject.hpp"
 
-subject::subject(std::string name) : name(name) {}
+Subject::Subject(std::string name) : name(name) {}
 
-std::string subject::get_name() { return name; }
+std::string Subject::get_name() { return name; }
 
-void subject::incr_take(subject* subj)
+void Subject::incr_take(std::shared_ptr<Subject> subj)
 {
     std::string new_name = subj->get_name();
     if (take_map.count(new_name))
@@ -14,7 +14,7 @@ void subject::incr_take(subject* subj)
     take_map[new_name] = subj;
 }
 
-void subject::add_priv(std::string& obj, std::string& priv)
+void Subject::add_priv(const std::string& obj, const std::string& priv)
 {
     if (capability_map.count(obj))
     {
@@ -26,7 +26,7 @@ void subject::add_priv(std::string& obj, std::string& priv)
     }
 }
 
-bool subject::is_authorized(std::string& obj, std::string& priv,
+bool Subject::is_authorized(const std::string& obj, const std::string& priv,
                             std::unordered_set<std::string>& visited)
 {
     if (capability_map.count(obj) && capability_map.at(obj).count(priv))

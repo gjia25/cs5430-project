@@ -1,98 +1,115 @@
-#include <cstring>
+#include <algorithm>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
+#include "input.hpp"
 #include "subject.hpp"
 
-std::unordered_map<std::string, subject*> subj_map;
+std::unordered_map<std::string, std::shared_ptr<Subject>> subj_map;
+std::unordered_set<std::string> subj_names;
+std::unordered_set<std::string> obj_names;
 
-std::vector<std::vector<std::string>> read_txt(const std::string& filename)
+static inline void ltrim(std::string& s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                                    [](char ch) { return !std::isspace(ch); }));
+}
+
+bool is_command(std::vector<std::string>& line)
+{
+    std::string& potential_type = line[0];
+    std::string& potential_subj = line[1];
+    std::string& potential_obj = line[2];
+    std::string& potential_priv = line[3];
+
+    if (potential_type == "Query" || potential_type == "Add")
+    {
+        if ((!subj_names.count(potential_subj) &&
+             !obj_names.count(potential_subj)) ||
+            subj_names.count(potential_subj))
+        {
+            if (potential_priv == "R" || potential_priv == "W")
+            {
+                if ((!subj_names.count(potential_obj) &&
+                     !obj_names.count(potential_obj)) ||
+                    obj_names.count(potential_obj))
+                {
+                    subj_names.insert(potential_subj);
+                    obj_names.insert(potential_obj);
+                    return true;
+                }
+            }
+            else if (potential_priv == "T")
+            {
+                if ((!subj_names.count(potential_obj) &&
+                     !obj_names.count(potential_obj)) ||
+                    subj_names.count(potential_obj))
+                {
+                    subj_names.insert(potential_subj);
+                    subj_names.insert(potential_obj);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+std::vector<std::shared_ptr<Line>> read_txt(const std::string& filename)
 {
     std::string line;
-    std::vector<std::vector<std::string>> the_txt;
+    std::vector<std::shared_ptr<Line>> the_txt;
     std::ifstream input_file(filename);
 
+    // parse input file, line by line
     while (std::getline(input_file, line))
     {
+        std::string line_cp = line;
         size_t idx = line.find('\r');
         if (idx != std::string::npos)
             line = line.substr(0, idx);
-
         std::vector<std::string> parsed;
+        // parsing an individual line of the input file
         while ((idx = line.find(',')) != std::string::npos)
         {
-            parsed.push_back(line.substr(0, idx));
+            std::string word = line.substr(0, idx);
+            ltrim(word);
+            parsed.push_back(word);
             line = line.substr(idx + 1);
         }
         parsed.push_back(line);
-        the_txt.push_back(parsed);
+        if (is_command(parsed))
+        {
+            auto new_command =
+                new Command(parsed[0], parsed[1], parsed[2], parsed[3]);
+            the_txt.emplace_back(
+                std::shared_ptr<Line>(static_cast<Line*>(new_command)));
+        }
+        else
+        {
+            auto new_comment = new Comment(line_cp);
+            the_txt.emplace_back(
+                std::shared_ptr<Line>(static_cast<Line*>(new_comment)));
+        }
     }
 
     input_file.close();
     return the_txt;
 }
 
-void execute_query(std::ofstream& fout, std::string& subj, std::string& obj,
-                   std::string& priv)
-{
-    std::string authorized;
-    std::unordered_set<std::string> visited = {};
-    if (subj_map.count(subj) &&
-        subj_map.at(subj)->is_authorized(obj, priv, visited))
-    {
-        authorized = "YES";
-    }
-    else
-    {
-        authorized = "NO";
-    }
-    std::cout << "Query, " << subj << ", " << obj << ", " << priv << " "
-              << authorized << std::endl;
-}
-
-void execute_add(std::ofstream& fout, std::string& subj, std::string& obj,
-                 std::string& priv)
-{
-    if (!subj_map.count(subj))
-    {
-        subject* new_subj = new subject(subj);
-        subj_map[subj] = new_subj;
-    }
-    if (priv != "T") {
-      subj_map.at(subj)->add_priv(obj, priv);
-    } else {
-      if (!subj_map.count(obj))
-      {
-          subject* new_subj_2 = new subject(obj);
-          subj_map[obj] = new_subj_2;
-      }
-      subj_map.at(subj)->incr_take(subj_map[obj]);
-    }
-    std::cout << "Add, " << subj << ", " << obj << ", " << priv << std::endl;
-}
-
 int main(const int argc, const char** argv)
 {
-    std::vector<std::vector<std::string>> input = read_txt(argv[1]);
+    std::vector<std::shared_ptr<Line>> input = read_txt(argv[1]);
     std::ofstream fout(argv[2]);
 
-    std::cout << "output file " << argv[2] << std::endl;
-
-    for (std::vector<std::string> line : input)
+    for (auto& line : input)
     {
-        if (line[0] == "Query")
-        {
-            execute_query(fout, line[1], line[2], line[3]);
-        }
-        else if (line[0] == "Add")
-        {
-            execute_add(fout, line[1], line[2], line[3]);
-        }
+        line->execute(fout);
     }
 
     return 0;
