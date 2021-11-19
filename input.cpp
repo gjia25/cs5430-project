@@ -9,8 +9,12 @@ extern std::unordered_map<std::string, std::shared_ptr<Subject>> subj_map;
 void execute_query(std::ofstream& fout, const std::string& subj,
                    const std::string& obj, const std::string& priv)
 {
+    // Start of by assuming access is unathorized,
     bool authorized = false;
+    // Subjects that you can take privileges from, that have been queried
     std::unordered_set<std::string> visited = {};
+    // Access is only authorized if 1) subject has been initialized previously
+    // and 2) subject has r/w privilege
     if (subj_map.count(subj) &&
         subj_map.at(subj)->is_authorized(obj, priv, visited))
     {

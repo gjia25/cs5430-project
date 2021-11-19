@@ -20,8 +20,17 @@ static inline void ltrim(std::string& s)
                                     [](char ch) { return !std::isspace(ch); }));
 }
 
+bool has_not_appeared(const std::string& potential)
+{
+    return !subj_names.count(potential) && !obj_names.count(potential);
+}
+
 bool is_command(std::vector<std::string>& line)
 {
+    if (line.size() != 4)
+    {
+        return false;
+    }
     std::string& potential_type = line[0];
     std::string& potential_subj = line[1];
     std::string& potential_obj = line[2];
@@ -29,14 +38,12 @@ bool is_command(std::vector<std::string>& line)
 
     if (potential_type == "Query" || potential_type == "Add")
     {
-        if ((!subj_names.count(potential_subj) &&
-             !obj_names.count(potential_subj)) ||
+        if (has_not_appeared(potential_subj) ||
             subj_names.count(potential_subj))
         {
             if (potential_priv == "R" || potential_priv == "W")
             {
-                if ((!subj_names.count(potential_obj) &&
-                     !obj_names.count(potential_obj)) ||
+                if (has_not_appeared(potential_obj) ||
                     obj_names.count(potential_obj))
                 {
                     subj_names.insert(potential_subj);
@@ -46,8 +53,7 @@ bool is_command(std::vector<std::string>& line)
             }
             else if (potential_priv == "T")
             {
-                if ((!subj_names.count(potential_obj) &&
-                     !obj_names.count(potential_obj)) ||
+                if (has_not_appeared(potential_obj) ||
                     subj_names.count(potential_obj))
                 {
                     subj_names.insert(potential_subj);

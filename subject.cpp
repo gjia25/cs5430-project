@@ -29,6 +29,10 @@ void Subject::add_priv(const std::string& obj, const std::string& priv)
 bool Subject::is_authorized(const std::string& obj, const std::string& priv,
                             std::unordered_set<std::string>& visited)
 {
+    if (priv == "T")
+    {
+        return take_map.count(obj);
+    }
     if (capability_map.count(obj) && capability_map.at(obj).count(priv))
     {
         return true;
