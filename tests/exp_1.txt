@@ -1,9 +1,6 @@
 Add, s1, o1, R
 Add, s2, o1, W
 Add, s1, o2, W
-@
-asdhah hello
-Query, s1, s1, R
 Query, s1, o1, R YES
 Query, s1, o2, R NO
 Add, s2, o2, R
