@@ -1,69 +1,121 @@
 // Authors: Linda Huang (sh837), Grace Jia (gj75) for CS5430 Fall 2021
 
-This testing document tests the analyzer's ability to distinguish between 
-commands and comments.
+This testing document tests the analyzer's ability to correctly parse the input
+txt and distinguish between commands and comments.
 
 ********************************************************************************
-Test 1: Random Characters
-*** analyzer should directly output comments that consist of a collection of
-    characters that bear no resemblance to command syntax.
+Test 1: Incorrect command input line length
+*** analyzer should recognize that lines of input that consist of fewer or more
+    than 4 comma separated values are comments.
 ***
+
+// replication of empty lines tests the case where comment length == 0
+
+// Comment: length == 1
 81271
+
+// Comment: length < 4
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
--= ]]]]][] || hello world
+
+// Comment: length > 4
+Add, s1, o1, R, P, T
 
 ********************************************************************************
-Test 2: Comma Separated Values
-*** to parse command, the analyzer breaks each line into comma-separated words. 
-    lines with a word count that is not equal to four are comments, 
-    and should be directly outputted.
+Test 2: Correct line length, but incorrect syntax.
+*** analyzer should recognize that lines of input that consist of 4 comma
+    separated values, but do not follow the syntax specified in the project
+    writeup are comments.
 ***
-// word-count < 4
-I, am, cheese!
-// word-count > 4
-big, bad, wolf, happy, sad
-// word-count == 1
-Add s1 s345 T
-Query s1 s345 T
 
-********************************************************************************
-Test 3: Add/Query commands
-*** tests if analyzer can identify valid add and query command syntax
-***
-// Valid command and query: s1 is previously unseen subject,
+// Invalid command: privilege field is not one of R, W, T
+Add, sw, ow, P
+Query, sw, ow, P
+
+// Invalid command: Command type is not one of Add, Query
+Jinx, sw, ow, R
+
+// Valid add and query: s1 is previously unseen subject,
 // o1 is previously unseen file object
 Add, s1, o1, R
 Query, s1, o1, R
-// Invalid command and query: P is not a valid privilege
-Add, s1, o1, P
-Query, s1, o1, P
-// Invalid command and query: requesting T privilege for file object
-Add, s1, o1, T
-Query, s1, o1, T
-// Valid command and query: requesting T privilege, where s2 is previously 
-// unseen subject (that is also an object)
+Query, s1, o1, W
+
+// Valid add and query: requesting T privilege, s1 is previously seen subject,
+// s2 is previously unseen object (that is also a subject)
 Add, s1, s2, T
 Query, s1, s2, T
-// Valid command and query: requesting T privilege, where s1 is previously 
-// seen subject (that is also an object)
-Add, s2, s1, T
-Query, s2, s1, T
-// Invalid command and query: cannot add write priv for subject s2
-Add, s1, s2, W
-Query, s1, s2, W
-// Invalid command and query: cannot add read priv for subject s2
+
+// Invalid add and query: s1 cannot have read priv for s2 (as s2 is not a
+// file)
 Add, s1, s2, R
 Query, s1, s2, R
-// Valid command and query: add write priv for previously seen subject s2, and
-// previously unseen object o2
-Add, s2, o2, W
-Query, s2, o2, W
-// Valid command and query: add write priv for previously seen subject s2, and
-// previously seen object o1
-Add, s2, o1, W
-Query, s2, o1, W
-// Valid command and query: add write priv for previously unseen subject s3, and
-// previously seen object o1
+
+// Invalid add and query: s1 cannot have write priv for s2 (as s2 is not a
+// file)
+Add, s1, s2, W
+Query, s1, s2, W
+
+// Invalid add and query: s1 cannot augment its privs with those of o1, as o1
+// is a file object and there exists no valid authorization triple (o1, O, p)
+Add, s1, o1, T
+Query, s1, o1, T
+
+// Invalid add and query: o1 cannot be given privs, as it is a file object and
+// not a subject
+Add, o1, o2, R
+Query, o1, o2, R
+
+********************************************************************************
+Test 3: (More) Valid Add/Query commands
+*** tests if analyzer can identify valid add and query command syntax
+***
+
+// Valid R and W commands
+
+// Valid add and queries: s3 is previously unseen subject,
+// o1 is previously seen file object
 Add, s3, o1, W
+Query, s3, o1, R
 Query, s3, o1, W
+
+// Valid add and queries: s1 is previously seen subject,
+// o3 is previously unseen file object
+Add, s1, o3, R
+Query, s1, o3, W
+Query, s1, o3, R
+
+// Valid add and queries: s3 is previously seen subject,
+// o3 is previously seen file object
+Add, s3, o3, R
+Query, s3, o3, R
+Query, s3, o3, W
+
+// Valid T commands
+
+// Valid add and query: requesting T privilege, s1 and s2 are previously 
+// seen objects (that are also subjects)
+Add, s2, s1, T
+Query, s2, s1, T
+
+// Valid add and query: requesting T privilege, s4 is a previously unseen
+// subject, s1 is a previously seen object (that is also a subject)
+Add, s4, s1, T
+Query, s4, s1, T
+
+// Valid add and query: requesting T privilege, s5 is a previously unseen
+// subject, s6 is a previously unseen object (that is also a subject)
+Add, s5, s6, T
+Query, s5, s6, T
+
+// Valid query: querying after privilege in previously unseen subject and 
+// object
+Query, s7, s8, T
+
+// Valid query: querying after privilege in previously unseen subject and 
+// seen object
+Query, s9, s1, T
+
+// Valid query: querying after privilege in previously seen subject and 
+// unseen object
+Query, s9, s10, T
 ********************************************************************************

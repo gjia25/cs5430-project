@@ -20,21 +20,6 @@ enum LINE_TYPE
     comment
 };
 
-// static inline void ltrim(std::string& s)
-// {
-//     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-//                                     [](char ch) { return !std::isspace(ch);
-//                                     }));
-// }
-
-// static inline void rtrim(std::string& s)
-// {
-//     s.erase(std::find_if(s.rbegin(), s.rend(),
-//                          [](unsigned char ch) { return !std::isspace(ch); })
-//                 .base(),
-//             s.end());
-// }
-
 void execute_query(std::ofstream& fout, const std::string& subj,
                    const std::string& obj, const std::string& priv)
 {
@@ -114,7 +99,7 @@ LINE_TYPE find_line_type(std::vector<std::string>& line)
     }
     else
     {
-        return LINE_TYPE::query;
+        return LINE_TYPE::comment;
     }
 
     if (has_not_appeared(potential_subj) || subj_names.count(potential_subj))
