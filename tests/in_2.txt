@@ -1,2 +1,0 @@
-Add,s1,o1,R
-Query,s1,o1,R
