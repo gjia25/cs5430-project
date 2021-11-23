@@ -1,16 +1,22 @@
-This tests the analyzer's functionality for a single subject.
+// Authors: Linda Huang (sh837), Grace Jia (gj75) for CS5430 Fall 2021
+
+This tests the correctness of the analyzer's functionality for a single subject,
+using commands that are syntactically correct.
 
 ********************************************************************************
 Test 1: incremental Add, single object
 *** after adding a triple (S, O, p), a query (S, O, p') returns YES only if p=p'.
 *** 
-// should initially have no privs
+
+// a subject (s1) should initially have no privs, as no authorization triples
+// are initially valid
 Query, s1, o1, R NO
 Query, s1, o1, W NO
 Query, s1, s1, T NO
 
+// adding one priv should not make other authorization triples valid
+// incrementally add privs to s1
 Add, s1, o1, R
-// adding one priv should not affect the others
 Query, s1, o1, R YES
 Query, s1, o1, W NO
 Query, s1, s1, T NO
@@ -20,6 +26,8 @@ Query, s1, o1, R YES
 Query, s1, o1, W YES
 Query, s1, s1, T NO
 
+// tests reflexivity of the Take relation (i.e. that a subject may Take from
+// itself)
 Add, s1, s1, T
 Query, s1, o1, R YES
 Query, s1, o1, W YES
@@ -27,8 +35,10 @@ Query, s1, s1, T YES
 
 ********************************************************************************
 Test 2: incremental Add, multiple objects
-*** same as above, but now keeping track of multiple object privs.
+*** same as above, but now keeping track of a subject's privs for multiple
+    objects.
 ***
+
 Add, s1, o2, W
 Add, s1, o3, R
 Query, s1, o1, R YES

@@ -34,6 +34,12 @@ Query, sw, ow, P
 // Invalid command: Command type is not one of Add, Query
 Jinx, sw, ow, R
 
+// Invalid command: subj name is longer than 15 chars
+Query, asdfasdkfasdfasdfa, ow, R
+
+// Invalid command: obj name is longer than 15 chars
+Query, sw, 198298192819829182, R
+
 // Valid add and query: s1 is previously unseen subject,
 // o1 is previously unseen file object
 Add, s1, o1, R
@@ -56,14 +62,25 @@ Add, s1, s2, W
 Query, s1, s2, W
 
 // Invalid add and query: s1 cannot augment its privs with those of o1, as o1
-// is a file object and there exists no valid authorization triple (o1, O, p)
+// is a file object and there can not be an authorization triple (o1, O, p)
+// as o1 is not a subject
 Add, s1, o1, T
 Query, s1, o1, T
 
-// Invalid add and query: o1 cannot be given privs, as it is a file object and
+// Invalid add and query: o1 cannot be given R priv, as it is a file object and
 // not a subject
 Add, o1, o2, R
 Query, o1, o2, R
+
+// Invalid add and query: o1 cannot be given W priv, as it is a file object and
+// not a subject
+Add, o1, o2, W
+Query, o1, o2, W
+
+// Invalid add and query: o1 cannot be given T priv, as it is a file object and
+// not a subject
+Add, o1, o2, T
+Query, o1, o2, T
 
 ********************************************************************************
 Test 3: (More) Valid Add/Query commands

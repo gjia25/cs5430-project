@@ -25,9 +25,10 @@ int main(const int argc, const char** argv)
     {
         for (uint32_t i = 0; i < num; i++)
         {
+            std::string priv = i % 2 ? "R" : "W";
             fout << "Add, "
                  << "s" << i << ", "
-                 << "o" << i << ", R" << std::endl;
+                 << "o" << i << ", " << priv << std::endl;
             if (i == num - 1)
             {
                 fout << "Add, "
@@ -43,9 +44,10 @@ int main(const int argc, const char** argv)
         }
         for (uint32_t i = 0; i < num; i++)
         {
+            std::string priv = i % 2 ? "R" : "W";
             fout << "Query, "
                  << "s0, "
-                 << "o" << i << ", R" << std::endl;
+                 << "o" << i << ", " << priv << std::endl;
         }
     }
 

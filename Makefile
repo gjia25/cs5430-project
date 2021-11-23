@@ -16,4 +16,4 @@ subject.o: subject.cpp subject.hpp
 	$(CC) $(CFLAGS) -c subject.cpp
 
 clean:
-	rm -f *.o analyzer time
+	rm -f *.o analyzer time tests/*_out.txt

@@ -87,6 +87,11 @@ LINE_TYPE find_line_type(std::vector<std::string>& line)
     std::string& potential_obj = line[2];
     std::string& potential_priv = line[3];
 
+    if (potential_subj.size() > 15 || potential_obj.size() > 15)
+    {
+        return LINE_TYPE::comment;
+    }
+
     LINE_TYPE line_type;
 
     if (potential_type == "Query")

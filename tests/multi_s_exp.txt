@@ -44,7 +44,8 @@ Add, s4, s3, T
 Query, s4, s3, T YES
 Query, s4, o1, W NO
 
-// Now a cyclic take relation is introduced
+// Now a cyclic take relation is introduced. s3 and s4 are still unable to write
+// to W
 Add, s3, s4, T
 Query, s3, s4, T YES
 Query, s3, o1, W NO
@@ -54,15 +55,19 @@ Query, s4, o1, W NO
 Test 5: Authorized accesses with multiple degrees of separation
 
 Add, s5, o1, R
+// Initially, (s8, o1, R) is not a valid authorization triple
 Query, s8, o1, R NO
 Add, s6, s5, T
 Add, s7, s6, T
 Add, s8, s7, T
+// Now, s8 should be able to take privs from s7
+// s7 takes privs from s6
+// s6 takes privs from s5, and now (s8, o1, R) is a valid authorization triple
 Query, s8, o1, R YES
 
 // tests directionality of the take command
 // s5 is not authorized to take privileges from s6, even though s6 is authorized
-// to take privileges from it, and thus still cannot write to o1
+// to take privileges from s5, and thus still cannot write to o1
 Query, s8, o1, W NO
 Add, s6, o1, W
 Query, s5, o1, W NO
@@ -72,11 +77,32 @@ Query, s8, o1, W YES
 ********************************************************************************
 Test 6: Incremental Adds with Multiple objects
 
-// s11 is allowed to write to o2 
+// s11 is able to read o3
+// s12 is able to write to o4
 Add, s11, o3, R
 Add, s12, o4, W
+// now s11 can take the privs of s12
 Add, s11, s12, T
 Query, s11, o3, R YES
+// s11 is still unable to write to o3
 Query, s11, o3, W NO
+// but it may take s12's privs
 Query, s11, s12, T YES
+// and write to o4 without having been directly authorized
 Query, s11, o4, W YES
+
+********************************************************************************
+Test 7: Non-Transitivity of T
+*** The T relationship is not transitive.
+***
+
+// s13 can invoke take on s14, s14 can invoke take on s15
+// but s13 is not authorized to invoke take on s15 (without going through s14)
+// because it doesn't have the privileges
+Add, s13, s14, T
+Add, s14, s15, T
+Query, s13, s14, T YES
+Query, s14, s15, T YES
+// s13 should not be able to take the privs of s15 (it can only take the privs
+// of s14, which in turn can take the privs of s15)
+Query, s13, s15, T NO
